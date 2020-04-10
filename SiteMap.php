@@ -1,66 +1,73 @@
 <?php
-require('./wp-blog-header.php');
-header("Content-type: text/xml");
-header('HTTP/1.1 200 OK');
-$posts_to_show = 1000;
-echo '<?xml version="1.0" encoding="UTF-8"?>';
-echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:mobile="http://www.baidu.com/schemas/sitemap-mobile/1/">'
+
+/**
+
+@package WordPress
+
+Template Name: 站点地图
+
+*/
+
 ?>
-<!-- generated-on=<?php echo get_lastpostdate('blog'); ?> -->
-<url>
-<loc><?php echo get_home_url(); ?></loc>
-<lastmod><?php $ltime = get_lastpostmodified(GMT);$ltime = gmdate('Y-m-d\TH:i:s+00:00', strtotime($ltime)); echo $ltime; ?></lastmod>
-<changefreq>daily</changefreq>
-<priority>1.0</priority>
-</url>
-<?php
-/* 文章页面 */
-$myposts = get_posts( "numberposts=" . $posts_to_show );
-foreach( $myposts as $post ) { ?>
-<url>
-<loc><?php the_permalink(); ?></loc>
-<lastmod><?php the_time('c') ?></lastmod>
-<changefreq>monthly</changefreq>
-<priority>0.6</priority>
-</url>
-<?php } /* 文章循环结束 */ ?>
-<?php
-/* 单页面 */
-$mypages = get_pages();
-if(count($mypages) > 0) {
-foreach($mypages as $page) { ?>
-<url>
-<loc><?php echo get_page_link($page->ID); ?></loc>
-<lastmod><?php echo str_replace(" ","T",get_page($page->ID)->post_modified); ?>+00:00</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.6</priority>
-</url>
-<?php }} /* 单页面循环结束 */ ?>
-<?php
-/* 博客分类 */
-$terms = get_terms('category', 'orderby=name&hide_empty=0' );
-$count = count($terms);
-if($count > 0){
-foreach ($terms as $term) { ?>
-<url>
-<loc><?php echo get_term_link($term, $term->slug); ?></loc>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<?php }} /* 分类循环结束 */?>
-<?php
-/* 标签(可选) */
-$tags = get_terms("post_tag");
-foreach ( $tags as $key => $tag ) {
-$link = get_term_link( intval($tag->term_id), "post_tag" );
-if ( is_wp_error( $link ) )
-return false;
-$tags[ $key ]->link = $link;
-?>
-<url>
-<loc><?php echo $link ?></loc>
-<changefreq>monthly</changefreq>
-<priority>0.4</priority>
-</url>
-<?php } /* 标签循环结束 */ ?>
-</urlset>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head profile="http://gmpg.org/xfn/11">
+
+<meta http-equiv="Content-Type" content="text/html; charset=<?php bloginfo( 'charset' ); ?>"/>
+
+<title>站点地图 - <?php bloginfo('name'); ?></title>
+
+<meta name="keywords" content="站点地图,<?php bloginfo('name'); ?>"/>
+
+<meta name="copyright" content="<?php bloginfo('name'); ?>"/>
+
+<link rel="canonical" href="<?php echo get_permalink(); ?>"/>
+
+<style type="text/css">
+
+body {font-family: Verdana;FONT-SIZE: 12px;MARGIN: 0;color: #000000;background: #ffffff;}
+
+img {border:0;}
+
+li {margin-top: 8px;}
+
+.page {padding: 4px; border-top: 1px#EEEEEEsolid}
+
+.author {background-color:#EEEEFF; padding: 6px; border-top: 1px#ddddeesolid}
+
+#nav, #content, #footer {padding: 8px; border: 1pxsolid#EEEEEE; clear: both; width: 95%; margin: auto; margin-top: 10px;}
+
+</style>
+
+</head>
+
+<body vlink="#333333"link="#333333">
+
+<h2 style="text-align: center; margin-top: 20px"><?php bloginfo('name'); ?>'s SiteMap </h2>
+
+<center></center>
+
+<div id="nav"><a href="<?php bloginfo('url'); ?>/"><strong><?php bloginfo('name'); ?></strong></a>&raquo;<a href="<?php echo get_permalink(); ?>">站点地图</a></div>
+
+<div id="content"><h3>最新文章</h3>
+
+<ul><?php $previous_year = $year =0; $previous_month = $month =0; $ul_open =false; $myposts = get_posts('numberposts=-1&orderby=post_date&order=DESC'); foreach($myposts as $post) : ?><li><a href="<?php the_permalink(); ?>" title="<?php the_title(); ?>" target="_blank"><?php the_title(); ?></a></li><?phpendforeach; ?></ul>
+
+</div>
+
+<div id="content"><li class="categories">分类目录<ul><?php wp_list_categories('title_li='); ?></ul></li></div>
+
+<div id="content"><li class="categories">单页面</li><?php wp_page_menu( $args ); ?></div>
+
+<div id="footer">查看博客首页: <strong><a href="<?php bloginfo('url'); ?>/"><?php bloginfo('name'); ?></a></strong></div>
+
+<br/><center><div style="text-algin: center; font-size: 11px">Latest Update: <?php $last = $wpdb->get_results("SELECT MAX(post_modified) AS MAX_m FROM $wpdb->posts WHERE (post_type = 'post' OR post_type = 'page') AND (post_status = 'publish' OR post_status = 'private')");$last = date('Y-m-d g:i:s', strtotime($last[0]->MAX_m));echo $last; ?><br/><br/></div></center>
+
+<center><div style="text-algin: center; font-size: 11px">Powered by <strong><a href="http://www.kilvn.com/view/wordpress-no-plugins-sitemap" target="_blank">免插件SiteMap</a></strong>&nbsp;&copy;<?phpecho date('Y'); ?><a href="<?php bloginfo('url');?>/"><?php bloginfo('name');?></a> 版权所有.<br/><br/></div></center>
+
+</body>
+
+</html>
